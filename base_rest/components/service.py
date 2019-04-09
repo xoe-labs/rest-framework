@@ -210,7 +210,8 @@ class BaseRestService(AbstractComponent):
     def _get_openapi_info(self):
         return {
             'title': "%s REST services" % self._usage,
-            'description': textwrap.dedent(getattr(self, '_description', ''))
+            'description': textwrap.dedent(getattr(self, '_description', '')),
+            "version": textwrap.dedent(getattr(self, '_version', '')),
         }
 
     def _get_openapi_servers(self):
