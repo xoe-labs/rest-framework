@@ -282,6 +282,7 @@ class BaseRestService(AbstractComponent):
             parameters = self._get_openapi_default_parameters()
             responses = self._get_openapi_default_responses().copy()
             path_info = {
+                'description': textwrap.dedent(method.__doc__ or ''),
                 'summary': textwrap.dedent(method.__doc__ or ''),
                 'parameters': parameters,
                 'responses': responses,
@@ -311,13 +312,16 @@ class BaseRestService(AbstractComponent):
                 json_output_schema = cerberus_to_json(
                     output_schema
                 )
-                responses['200'] = {
-                    'content': {
-                        'application/json': {
-                            'schema': json_output_schema
-                        }
-                    }
-                }
+                responses['200'] = {'description': 'OK',
+                                '$ref': '',  # field required by the swagger validator
+                                'content': {
+                                    'application/json': {
+                                        "schema": {
+                                            "type": "array",
+                                            "items":
+                                              json_output_schema
+
+                                          }}}}
 
             if name in ('search', 'get'):
                 get = {'get': path_info}
@@ -360,7 +364,7 @@ class BaseRestService(AbstractComponent):
             else:
                 # parameter for HTTP Post are given as a json document into the
                 # requestBody
-                path_info['requestBody'] = {
+                path_info['requestBody'] = {'$ref': '',  # field required by the swagger validator
                     'content': {
                         'application/json': {
                             'schema': json_input_schema
