@@ -27,7 +27,7 @@ from odoo.exceptions import (
     UserError,
     ValidationError,
 )
-from odoo.http import HttpRequest, Root, SessionExpiredException, request
+from odoo.http import HttpRequest, Root, SessionExpiredException, request, JsonRequest
 from odoo.tools import ustr
 from odoo.tools.config import config
 
@@ -50,6 +50,23 @@ class JSONEncoder(json.JSONEncoder):
             return obj.isoformat()
         return super(JSONEncoder, self).default(obj)
 
+def make_json_response(req, data, status_code):
+    headers = {}
+    for key, value in req.httprequest.headers.items():
+        headers[key] = value
+
+    if req._request_type == "json":
+        response = req._json_response(result={"message": data.get("data")},
+            error={"message": data.get("error")}
+        )
+    else:
+        response = req.make_json_response(
+                    data=data,
+                    headers=headers,
+                    cookies=req.httprequest.cookies
+                )
+    response.status_code = status_code
+    return response
 
 def wrapJsonException(exception, include_description=False):
     """Wrapper method that modify the exception in order
